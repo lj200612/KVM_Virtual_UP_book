@@ -1,0 +1,311 @@
+\documentclass[12pt, twoside, openany]{book}
+
+% 设置页边距
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=2.5cm,right=2cm,headheight=15pt]{geometry}
+
+% 中文支持
+\usepackage[UTF8]{ctex}
+
+% 其他常用包
+\usepackage{graphicx} % 插入图片
+\usepackage{amsmath, amssymb} % 数学公式
+\usepackage{amsthm} % 定理环境
+\usepackage[hidelinks]{hyperref} % 超链接
+\usepackage{bookmark} % 更好地处理PDF书签和目录
+%\usepackage{titlesec} % 标题格式 - 注释掉以防干扰自定义样式
+\usepackage{titletoc} % 目录格式
+\usepackage[nottoc]{tocbibind} % 目录和附录
+\usepackage{fancyhdr} % 页眉页脚
+\usepackage[table,dvipsnames]{xcolor} % 支持颜色，允许表格和tcolorbox使用颜色名
+\definecolor{gray}{rgb}{0.9,0.9,0.9} % 定义gray颜色
+\usepackage[most]{tcolorbox} % 用于创建精美的彩色文本框
+\usepackage{etoolbox} % 用于修改标题格式
+\usepackage{tikz} % 用于绘制斜线装饰
+\usepackage{listings} % 用于代码高亮
+\usepackage[format=hang,font=small,textfont=it]{caption}
+\usepackage{natbib} % For bibliography support
+
+
+\lstset{
+    basicstyle          =   \ttfamily,          % 基本代码风格
+    keywordstyle        =   \bfseries,          % 关键字风格
+    commentstyle        =   \rmfamily\itshape,  % 注释的风格，斜体
+    stringstyle         =   \ttfamily,  % 字符串风格
+    flexiblecolumns,                % 别问为什么，加上这个
+    numbers             =   left,   % 行号的位置在左边
+    showspaces          =   false,  % 是否显示空格，显示了有点乱，所以不现实了
+    numberstyle         =   \zihao{-5}\ttfamily,    % 行号的样式，小五号，tt等宽字体
+    showstringspaces    =   false,
+    captionpos          =   t,      % 这段代码的名字所呈现的位置，t指的是top上面
+    frame               =   lrtb,   % 显示边框
+    breaklines          =   true    %  行代码换行
+}
+
+\renewcommand{\lstlistingname}{\it 代码} % 代码的标题
+
+% 经验总结环境
+\newcounter{expnum}[chapter]
+\setcounter{expnum}{0} % 确保从0开始，这样第一次使用时为1
+\renewcommand{\theexpnum}{\thechapter.\arabic{expnum}} % 设置经验总结编号格式
+
+% 使用一个更简单但可靠的方式定义经验总结环境
+\newtcolorbox{experiencebox}[2][]{%
+  enhanced,
+  breakable,
+  colback=gray!100,
+  colframe=black,
+  arc=2mm,
+  boxrule=1pt,
+  left=10pt,
+  right=10pt,
+  top=10pt,
+  bottom=5pt,
+  before upper={\stepcounter{expnum}\noindent\textbf{【经验总结 \theexpnum】}~#2},
+  #1
+}
+
+\newtheoremstyle{brack}
+{6pt} % Space above
+{6pt} % Space below
+{\normalfont \kaishu} % Body font
+{0pt} % Indent amount
+{\bfseries} % Theorem head font
+{} % Punctuation after theorem head
+{0.5em} % Space after theorem head
+{【#1 #2】} % Theorem head spec (can be left empty, meaning `normal')
+\theoremstyle{brack}
+
+\newtheorem{lab}{实验}[chapter]
+\newtheorem{change}{思考}[lab]
+
+
+% 使用TikZ创建章节标题样式
+\usetikzlibrary{shapes.geometric,calc}
+
+% 定义章节标题TikZ命令
+\newcommand{\chaptertikztitle}[1]{%
+  \begin{tikzpicture}[baseline]
+    % 创建左侧图形组
+    \begin{scope}
+      % 灰色圆环 - 调整尺寸
+      \fill[gray!100] (0,0) circle (1cm);
+      \fill[white] (0,0) circle (0.65cm);
+      
+      % 外部虚线圆 - 更深的灰色
+      \draw[dashed, black!50, line width=2pt] (0,0) circle (1.25cm);      % 单个平行四边形（简化设计）
+      \begin{scope}[shift={(0,0)}]
+
+
+        
+        % 文字
+        \node[font=\Large\bfseries, align=center] at (0,0) {第\arabic{chapter} 章};
+      \end{scope}
+    \end{scope}    
+    % 添加右侧的标题文字 - 更大字体
+    \node[anchor=west, font=\LARGE\bfseries] at (2.2,0) {#1};
+  \end{tikzpicture}%
+}
+
+% 自定义章节标题格式
+\makeatletter
+\newcommand{\chaptertitle}[1]{%
+  \chaptertikztitle{#1}%
+}
+
+% 替换带编号的章节标题格式
+\def\@makechapterhead#1{%
+  \vspace*{30\p@}%
+  {\parindent \z@ \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+      \if@mainmatter
+        \chaptertitle{#1}\par\nobreak
+      \else
+        % 前言部分使用普通格式
+        \begin{tikzpicture}
+          \node[anchor=west, inner sep=0pt] at (0,0) {\Huge\bfseries #1};
+          \draw[dashed, line width=1pt, gray] (0,-0.85) -- (\textwidth,-0.85);
+        \end{tikzpicture}\par\nobreak
+      \fi
+    \else
+      % 无编号章节的处理
+      \begin{tikzpicture}
+        \node[anchor=west, inner sep=0pt] at (0,0) {\Huge\bfseries #1};
+        \draw[dashed, line width=1pt, gray] (0,-0.85) -- (\textwidth,-0.85);
+      \end{tikzpicture}\par\nobreak
+    \fi
+    \vskip 40\p@
+  }}
+
+% 同样应用样式到无编号章节  
+\def\@makeschapterhead#1{%
+  \vspace*{30\p@}%
+  {\parindent \z@ \centering
+    \normalfont
+    \begin{tikzpicture}
+    % 无编号章节只显示标题和虚线，居中显示
+    \node[anchor=center, inner sep=0pt] at (0,0) {\Huge\bfseries #1};
+    \draw[dashed, line width=1pt, gray] (-0.5\textwidth,-0.85) -- (0.5\textwidth,-0.85);
+    \end{tikzpicture}\par\nobreak
+    \vskip 40\p@
+  }}
+\makeatother
+
+% 章节和小节标题样式
+% 小节标题使用传统的方式居中
+\makeatletter
+\let\oldsection\section
+\renewcommand{\section}[2][\relax]{%
+  \ifx#1\relax
+    \oldsection[#2]{\centering #2}%
+    \sectionmark{#2}% Override the mark with non-centered text
+  \else
+    \oldsection[#1]{\centering #2}%
+  \fi
+}
+\makeatother
+
+\renewcommand{\chaptermark}[1]{\markboth{第\thechapter 章 \ #1}{}}
+
+% 自定义章节目录格式
+\titlecontents{chapter}[2em]{\bfseries\large}{\ifnum\thecontentslabel>0 第\,\thecontentslabel\,章\quad\else\fi}{\hspace*{-1.5em}}{\hfill\contentspage}
+\titlecontents{section}[7em]{\normalfont}{{\contentslabel{2.5em}}}{\hspace*{-2.5em}}{\titlerule*[0.5em]{.}\contentspage}
+\titlecontents{subsection}[9.6em]{\normalfont}{{\contentslabel{2.5em}}}{\hspace*{-2.5em}}{\titlerule*[0.5em]{.}\contentspage}
+
+% 简单的页眉设置
+\fancypagestyle{mainStyle}{%
+  \fancyhf{} % 清除所有页眉页脚
+  \fancyhead[RO]{\it \leftmark} % 奇数页右侧显示章标题
+  \fancyhead[LE]{\it \rightmark} % 偶数页左侧显示节标题
+  \renewcommand{\headrulewidth}{0pt} % 移除页眉下方的横线
+
+  
+  % 页码位置
+  \fancyfoot[LE,RO]{\thepage}
+}
+
+\begin{document}
+\frontmatter
+\title{\heiti \textbf{KVM}虚拟化进阶与提高}
+\author{\kaishu 作者：李杰}
+\date{\empty}
+\maketitle
+
+
+\setcounter{page}{1}
+\pagestyle{plain}
+
+
+\chapter*{前\hspace{2em}言}
+该内容为个人学习KVM虚拟化进阶与提高过程中所记述的笔记，内容主要包括虚拟网络高级特性、虚拟机迁移、KVM群集、嵌套虚拟化、性能监视与优化、P2V、V2V迁移、备份与恢复、oVirt（RHEV）安装和基本管理等方面的内容。
+
+\textbf{虚拟网络高级特性包括}：多物理网卡的绑定、配置VLAN、网络过滤。\textbf{虚拟机迁移}：静态迁移和动态迁移。\textbf{KVM群集三种方式}：NFS、GFS2、OCFS2。\textbf{嵌套虚拟化}：KVM虚拟机中运行KVM虚拟机。\textbf{性能监视与优化}：CPU、内存、IO、网络等性能监视与优化。\textbf{P2V}：物理机转虚拟机。\textbf{V2V}：虚拟机转虚拟机。\textbf{备份与恢复}：快照和备份。\textbf{oVirt（RHEV）}安装和基本管理。
+
+\begin{flushright}
+\kaishu 李杰\\
+\today
+\end{flushright}
+
+\chapter*{术\hspace{1.8em}语\hspace{1.8em}表}
+\begin{description}
+\item[KVM] 基于内核的虚拟机(Kernel-based Virtual Machine)，是Linux内核中的一个模块，允许在Linux系统上运行虚拟机。
+\item[VLAN] 虚拟局域网(Virtual Local Area Network)，是一种在单一物理网络上创建多个逻辑网络的技术。
+\item[oVirt] 红帽企业虚拟化管理工具，提供了一个集中管理虚拟化基础设施的平台。
+\item[P2V] 物理机转虚拟机(Physical to Virtual)，将物理服务器转换为虚拟机的过程。
+\item[V2V] 虚拟机转虚拟机(Virtual to Virtual)，将一种虚拟化平台上的虚拟机转换到另一种虚拟化平台的过程。
+\end{description}
+
+
+% 自定义目录标题格式 - 分散显示
+\renewcommand{\contentsname}{\centerline{\Huge 目\hspace{2em}录}}
+\tableofcontents
+
+
+
+
+\mainmatter
+\pagestyle{mainStyle} % 使用新定义的页面样式
+\renewcommand{\chaptermark}[1]{\markboth{第\thechapter 章~~~#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection~~~#1}}
+
+\chapter{虚拟网络的高级特性}
+\section{多物理网卡的绑定}
+如果一台服务器只有一块物理网卡，那么虚拟机只能使用这块网卡，无法使用其他的网卡。为了提高网络性能（提供负载平衡与冗余），可以将多块物理网卡绑定在一起，形成一个虚拟网卡，这样虚拟机就可以使用这个虚拟网卡。
+
+\subsection{配置多网卡绑定的KVM桥接模式}
+接下来将介绍如何配置多网卡绑定的KVM桥接模式。假设有两块物理网卡eth0和eth1，分别连接到不同的交换机上。我们将这两块网卡绑定在一起，形成一个虚拟网卡bond0，然后将bond0配置为KVM桥接模式。
+\begin{lab}
+  (配置多网卡绑定的KVM桥接模式)
+  \begin{enumerate}
+    \item 绑定网卡
+    \begin{enumerate}
+      \item 启用bonding模块
+      \item 配置物理网卡
+      \item 配置绑定接口
+      \item 重新启动服务
+      \item 测试
+    \end{enumerate}
+    \item 配置桥接
+  \end{enumerate}
+\end{lab}
+首先使用\lstinline|ip link、ifconfig|指令查看当前的网络配置，确认与eth0和eth1相关的信息。接在使用virtsh或者virt-manager新建网络接口，选择桥接模式，网卡选择bond0。接着使用\lstinline|ifconfig bond0|指令查看bond0的状态，确认bond0已经创建成功。
+接着使用\lstinline|modprobe bonding|指令启用bonding模块。使用\lstinline|lsmod grep bonding|指令查看当前加载的模块，确认bonding模块已经加载成功。
+在主网卡eth0和eth1的配置文件中添加以下内容（提前做好备份）：
+\begin{lstlisting}[caption={网卡配置文件}]
+  # ifcfg-eth0
+  {
+    Type=Ethernet
+    BOOTPROTO=none
+    NAME=eth0
+    DEVICE=eth0
+    ONBOOT=yes
+    MASTER=bond0 # 绑定到bond0
+    SLAVE=yes
+    NM_CONTROLLED=no # 不受NetworkManager控制
+    USERCTL=no # 不允许用户控制
+  }
+  # ifcfg-eth1
+  {
+    Type=Ethernet
+    BOOTPROTO=none
+    NAME=eth1
+    DEVICE=eth1
+    ONBOOT=yes
+    MASTER=bond0
+    SLAVE=yes
+    NM_CONTROLLED=no
+    USERCTL=no
+  }
+  # ifcfg-bond0
+  {
+    DEVICE=bond0
+    ONBOOT=yes
+    NM_CONTROLLED=no
+    USERCTL=no
+    BONDING_OPTS="mode=1 miimon=100"
+    BOOTPROTO=static
+    IPADDR=192.168.200.11
+    NETMASK=255.255.255.0
+  }
+\end{lstlisting}
+
+以上只有TYPE、BOOTPROTO、DEVICE、ONBOOT、MASTER、SLAVE、NM\_CONTROLLED、USERCTL、BONDING\_OPTS、BOOTPROTO、IPADDR、NETMASK等参数是必须的，其他参数可以根据需要添加。接着使用\lstinline|ifup bond0|指令启用bond0接口，使用\lstinline|ifconfig bond0|指令查看bond0的状态，确认bond0已经创建成功。
+\begin{change}
+对于mode有七种选项，分别是
+\begin{itemize}
+  \item \textbf{mode=0 (balance-rr)}: 轮询模式，数据包按顺序在每个接口上发送，提供负载均衡和容错能力。
+  \item \textbf{mode=1 (active-backup)}: 主备模式，只有一个接口处于活动状态，其他接口作为备份，提供高可用性。
+  \item \textbf{mode=2 (balance-xor)}: 基于源MAC地址和目标MAC地址的哈希算法选择接口，提供负载均衡和容错能力。
+  \item \textbf{mode=3 (broadcast)}: 广播模式，所有数据包在所有接口上发送，提供容错能力。
+  \item \textbf{mode=4 (802.3ad)}: IEEE 802.3ad 动态链路聚合模式，需要交换机支持，提供负载均衡和高性能。
+  \item \textbf{mode=5 (balance-tlb)}: 适配器传输负载均衡，根据负载动态分配流量，接收流量由当前接口处理。
+  \item \textbf{mode=6 (balance-alb)}: 适配器负载均衡，扩展了 mode=5，支持接收和发送流量的负载均衡。
+\end{itemize}
+\end{change}
+
+
+
+
+
+
+
+\end{document}
